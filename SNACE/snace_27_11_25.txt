@@ -1,0 +1,65 @@
+When we talk about tactile primitives, we mean the basic perceptual building blocks that the nervous system extracts and then uses for higher level tasks.
+Texture sits right next to force, shape, and temperature as a primary building block.
+
+First, texture is an early and reliable descriptor. 
+The moment your finger moves on a surface, micro structure generates distinctive vibration and deformation patterns, so you get texture information almost immediately.
+It is a fast cue compared to some other properties.
+
+Second, texture is tightly linked to contact physics. Different textures imply different friction regimes.
+Your brain uses that to estimate how safe a grasp is and how much grip force is needed.
+This is why you naturally squeeze a smooth glass more carefully than rough cardboard.
+Texture is basically a friction and slip predictor.
+
+Third, texture provides identity.
+Many materials are visually similar but tactually distinct, and when vision is ambiguous, occluded, or unreliable, texture becomes the deciding signal.
+In daily life this is obvious in the dark, inside pockets, or when the object is reflective or transparent.
+
+Fourth, texture is not passive. Humans actively modulate speed, force, and finger posture to bring out texture cues. 
+You slide faster to amplify fine vibrations, press harder to feel coarse roughness. 
+That active loop is central to how robust human texture perception is.
+
+Finally, because texture is both informative and action relevant, it becomes a core input to manipulation.
+It helps prevent slip before it happens, stabilizes grasps, and guides exploration choices.
+That is why modelling mechanoreceptors and event based texture processing is not just a benchmark choice but a way to capture a fundamental function of touch.
+
+
+In touch, texture is not a static property you read out at rest. It emerges from interaction. The key is that your skin is a mechanical sensor, so texture is the way a surface perturbs the skin when you press, tap, or slide.
+
+There are two main information channels. One is spatial. If the surface has bumps, grooves, or grains large enough compared to the skin receptive fields, they create a spatial deformation pattern across the fingerprint ridges and the contact area. The nervous system reads that as coarse roughness or pattern.
+
+The second channel is temporal. For very fine textures, the microfeatures are too small to resolve spatially, but when you slide, they generate vibrations in the skin. Those vibrations have characteristic frequency content and timing. The brain reads those temporal signatures as fine texture, like silk versus plastic, even if both feel smooth under static press.
+
+This is why the same surface can feel different if you change exploration. Sliding faster shifts vibration frequencies upward and increases energy, pressing harder changes contact area and which features are engaged. Direction matters too because asperities are anisotropic. So in tactile science, texture is defined as the spatiotemporal signal produced by surface microstructure under active exploration.
+
+A nice way to summarize it in words is: texture is the combination of how the surface shapes the contact patch and how it excites skin vibrations during motion.
+
+
+The standard tactile texture setup in robotics or haptics is borrowed from classic signal processing and vision. You have a sensor that produces a dense stream of samples, for example taxel arrays sampling pressure maps, PVDF films sampling vibrations, or optical tactile sensors sampling deformation images. The key point is that sampling is continuous and clock driven even when nothing informative is happening.
+
+Those samples are grouped into frames. Then you run feature extraction. Older approaches use handcrafted features like FFT band powers. Newer approaches often skip explicit feature design and feed frames into deep networks like CNNs, ConvLSTMs, or transformers that learn spatiotemporal features automatically.
+
+Finally you classify. The classifier is trained offline, often in controlled conditions with fixed speeds and forces, then deployed. Performance can be great, but the pipeline has two structural issues. First, scaling is hard because continuous sampling produces huge data rates and power costs when you go from a fingertip to a full hand skin. Second, texture signatures shift a lot with exploration conditions, so you need either many training conditions or explicit normalization to generalize.
+
+That sets up why event based tactile encoding is attractive. It keeps the useful parts of this pipeline, meaning that you still end up with a classifier, but it changes the front end so you only transmit and process informative moments, and it lets you build in biological dynamics before learning.
+
+
+Texture during touch is fundamentally eventful. When you slide across a surface, most samples are boring, and then suddenly you get stick slip micro events, impacts from asperities, and rapid changes at contact onset or offset. Those bursts carry a lot of information about the microstructure. An event based encoder is a natural match because it only emits spikes when those informative transients happen, instead of streaming redundant samples.
+
+The timing of these events matters a lot. Fine textures show up mainly as specific vibration timing patterns in the skin. Spikes preserve that timing with microsecond level precision in hardware, while frame based sampling tends to blur or average it unless you run at very high rates.
+
+Scalability is another big reason. If you want a full hand or arm skin, continuous sampling across thousands of channels becomes a bandwidth and power wall. Neuromorphic front ends compress at the edge, and the system stays scalable because computation and communication grow with information, not with sensor count.
+
+There is also a biological argument. Humans solve texture with multiple mechanoreceptor channels that implement adaptation and frequency preferences. If you implement RAI and SAII style dynamics on chip, you are baking in priors that biology already optimized for invariance to scanning speed, force changes, and contact uncertainty. That makes the representation more stable even before you train a network.
+
+Finally, touch is learned and refined online in real life. Local plasticity rules and predictive coding style inference are compatible with spiking hardware, so you can learn textures continually without huge offline datasets. That aligns with how touch is actually used in manipulation and exploration.
+
+
+New biologically inspired tactile sensing architecture extending the State of the Art by:
+
+Integrating multiple mechanoreceptor models: implements Fast-Adapting (FA), Slowly-Adapting (SA) pathways for rich temporal encoding of tactile stimuli.
+
+Performing on-chip analog-to-spike transduction at the taxel level: Each taxel independently converts tactile input into sparse, meaningful spike trains.
+
+Reducing data redundancy through event-driven encoding: Spikes are only emitted upon significant signal changes, reducing bandwidth and power consumption.
+
+Enabling asynchronous spike-based communication via AER:  Address-Event Representation ensures efficient and scalable routing of tactile events to downstream processors.
